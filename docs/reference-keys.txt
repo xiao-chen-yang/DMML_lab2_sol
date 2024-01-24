@@ -1,0 +1,8 @@
+welcome-to-dmml-lab-2
+exercise-1-tasks-in-lecture-notes
+exercise-2-identifying-letters-of-alphabet
+exercise-3-employment-in-europe
+solutions
+task-1
+task-2
+task-3

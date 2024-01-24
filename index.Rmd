@@ -1,0 +1,77 @@
+---
+title: "STATS5099 Data Mining and Machine Learning"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+biblio-style: apalike
+link-citations: yes
+---
+
+```{r setup, include = FALSE}
+library(webexercises)
+library(tinytex)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+
+options(digits=4)
+```
+
+
+```{r include=FALSE, echo=FALSE}
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```
+
+
+# Welcome to DMML Lab 2
+
+In week 2, we have studied multidimensional scaling (MDS) to perform nonlinear dimension reduction. 
+
+While MDS can be applied to any proximity data (i.e. similarity or dissimilarity), many `R` functions take the dissimilarity matrix as input. Therefore, the first step is always to check that the input data is a dissimilarity matrix and, if needed, convert any similarity matrix or data matrix into a dissimilarity matrix by using: 
+
+```{r echo=TRUE, eval=FALSE}
+# convert data matrix to dissimilarity
+dist(X) #X: a data object, where each row is an observation and each column is a variable
+
+# convert similarity to dissimilarity:
+library(smacof)
+sim2diss(s, method)  #s: similarity matrix
+                     #method: see help page of sim2diss for details
+```
+
+More information about the argument `method` in `sim2diss` can be found in Table 2 of the package [vignette](https://cran.r-project.org/web/packages/smacof/vignettes/smacof.pdf).
+
+According to the characteristics of the dissimilarity matrix, we then decide whether to apply classical MDS, metric MDS (including Sammon mapping), or non-metric MDS: 
+```{r echo=TRUE, eval=FALSE}
+# classical MDS
+cmdscale(d, k) #d: dissimilarity matrix; k: number of dimensions to be retained
+
+# Sammon mapping
+library(MASS)
+sammon(d, k) #d: dissimilarity matrix; k: number of dimensions to be retained
+
+# metric MDS
+library(smacof)
+mds(delta, type=c("ratio","interval") #delta: disimilarity matrix
+    #When using "ratio", the function f in metric MDS is chosen as f(x)=bx;
+    #When using "interval", the function f is chosen as f(x)=a+bx.
+    
+# metric MDS
+mds(delta, type="ordinal") #delta: disimilarity matrix
+    #'type="ordinal' means the function f in non-metric MDS is a monotonic step function. 
+
+```
+
+One way to determine the number of dimensions for the new feature space is by using the scree plot, similar to Cattell's method for principal component analysis. For metric and non-metric MDS, the stress value can be extracted by using `$stress`. 
+
+Finally, we can visualise the configuration points through scatterplots and evaluate goodness of MDS through Shepard diagrams:
+```{r, eval=FALSE, echo=TRUE}
+# scatterplot
+plot(mds.object)
+
+# Shepard diagram
+plot(mds.object, plot.type="Shepard") #mds.object: output of 'mds()' 
+```

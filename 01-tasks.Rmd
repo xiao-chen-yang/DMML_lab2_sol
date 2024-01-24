@@ -1,0 +1,9 @@
+# Exercise 1: Tasks in lecture notes
+
+**Task 1**: Perform the Sammon mapping on the `crimes` dataset using the command `sammon` from the `MASS` library and comment on the scatterplot.
+
+`r hide("Hint")`
+The `crimes` dataset contains correlation between seven crime types, and therefore, the first step is to convert the correlation matrix into the dissimilarity matrix by using `sim2dist(crimes, method="corr")`. 
+
+After performing sammon mapping, configuration points are stored `$points`. 
+`r unhide()`

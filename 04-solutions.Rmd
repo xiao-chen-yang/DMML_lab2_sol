@@ -1,0 +1,181 @@
+# Solutions
+
+## Task 1
+
+The steps for implementing Sammon mapping are similar to implementing metric MDS, that is, we need to first convert the inter-correlations into a dissimilarity matrix and then apply the `sammon` command.
+```{r, fig.height=4,fig.width=7,fig.align='center', warning=FALSE, message=FALSE}
+library(MASS);library(smacof)
+crime.dist <- sim2diss(crimes, method="corr")
+set.seed(1)
+crime.sm<-sammon(crime.dist,k=2)
+plot(crime.sm$points,type="n",asp=1)
+text(crime.sm$points,labels=names(crimes))
+```
+The plot is quite similar to the result obtained from metric MDS, except that the distance between Murder and Assault increases slightly.
+
+## Task 2
+
+(a) The data is in a format of the proximity matrix rather than the data matrix. Therefore, PCA is not suitable. 
+
+(b) A larger value indicates that two letters are more likely to cause confusion and thus more similar.
+
+(c) As this is a similarity matrix, the first step is to convert the data into a dissimilarity matrix. 
+
+```{r, warning=FALSE}
+library(smacof)
+letter <- read.csv("letter.csv", row.names=1)
+letter.dist <- sim2diss(letter, method=max(letter)) #z-s_ij
+letter.dist <- as.dist(letter.dist)
+letter.dist
+```
+
+Because we have deduced dissimilarities from similarities, the absolute dissimilarities $\delta_ij$ depend on the value of personally chosen $z$. This is the case where the non-metric MDS makes most sense. 
+
+```{r, message=FALSE, warning=FALSE}
+#nonmetric MDS
+#2D
+set.seed(1)
+letter.nmds2 <- mds(letter.dist, ndim=2, type="ordinal")
+plot(letter.nmds2,asp=1)
+plot(letter.nmds2,plot.type="Shepard")
+letter.nmds2$stress
+# Kruskal (1964) gave following advise about stress values based on his experience:
+# Stress Goodness-of-fit
+# 0.200  poor
+# 0.100  fair
+# 0.050  good
+# 0.025  excellent
+# 0.000  perfect
+# More recent articles caution against using a table like this since acceptable values of stress depends on the quality of the distance matrix and the number of objects in that matrix.
+```
+
+Let's try reducing the data to 3 dimensions.
+```{r}
+#3D
+set.seed(1)
+letter.nmds3 <- mds(letter.dist, ndim=3, type="ordinal")
+library(rgl)
+# plot3d(letter.nmds3$conf[,1],letter.nmds3$conf[,2],
+#        letter.nmds3$conf[,3],type="",
+#        xlab="Axis 1",ylab="Axis 2",zlab="Axis 3",asp=1)
+text3d(letter.nmds3$conf[,1],letter.nmds3$conf[,2],
+       letter.nmds3$conf[,3],texts=names(letter.dist),asp=1)
+plot(letter.nmds3,plot.type="Shepard")
+letter.nmds3$stress
+```
+
+(d) To produce the scree plot, we need to compute the stress value for each dimension. 
+
+```{r}
+N_dim <- 1:(nrow(letter)-1)
+letter.nmds <- matrix(nrow=length(N_dim),ncol=2)
+for (i in N_dim){
+  letter.nmds[i,1] <- i
+  letter.nmds[i,2] <- mds(letter.dist, ndim=i, type="ordinal")$stress 
+}
+plot(letter.nmds, type="b", main="scree plot", 
+     xlab="number of dimensions", ylab="stress-1")
+```
+
+The scree plot suggests that using three dimensions could give a relatively small stress value. 
+
+(e) Based on the 3D plot in (c), one might argue that C, D, G, Q forms a cluster and H, M, N, W forms another cluster. 
+
+(f) When converting confusion to distance, we have introduced the parameter $z$ (maximum value to be subtracted from). Now we will create a function to investigate the effect of $z$.
+```{r}
+Z <- seq(max(letter), by=1, length.out=100)
+letter.z <- matrix(nrow=length(Z), ncol=2)
+for (i in 1:length(Z)){
+  letter.dist <- sim2diss(letter, method=Z[i])
+  set.seed(1)
+  letter.z[i,1] <- Z[i]
+  letter.z[i,2] <- mds(letter.dist, ndim=3, type="ordinal")$stress 
+}
+plot(letter.z, xlab="integer z", ylab="stress-1")
+```
+
+It is clear that $z$ has a large influence on the stress value. 
+
+(g) To test the sensitivity to initial configuration, we need to change the current way of initialisation, which is classical MDS by default. Specially, we need to use the argument: `init="random"`
+```{r}
+Seed <- 1:100
+letter.seed <- matrix(nrow=length(Seed), ncol=1)
+for (i in Seed){
+  letter.dist <- sim2diss(letter, method=max(letter))
+  set.seed(i)
+  letter.seed[i] <- mds(letter.dist,ndim=3, type="ordinal", init="random")$stress 
+}
+hist(letter.seed, xlab="stress value", main="Histogram of stress values computed over 100 random initialisations")
+```
+
+
+## Task 3
+
+(a) As the variables have different variances, it would be better to use standardised variables when computing the pairwise distances.
+```{r}
+apply(employ,2,var)
+```
+
+
+(b)
+```{r}
+employ.sd <- scale(employ)
+employ.dist <- dist(employ.sd) #to visualise countries as data points
+employ.dist.var <- dist(t(employ.sd)) #to visualise variables as data points
+```
+
+(c) As we have created the distance matrix directly from the data, metric MDS would be a better choice. 
+
+(d) There are three types of metric MDS covered in the lecture.
+
+Classical MDS (`cmdscale`) is omitted as it is equivalent to PCA (check that!)
+
+Metric MDS can be computed using `mds`. 
+```{r}
+library(smacof)
+set.seed(1)
+employ.mds2 <- mds(employ.dist, ndim=2, type="interval")
+plot(employ.mds2)
+plot(employ.mds2,plot.type="Shepard")
+```
+
+The Shepard diagram suggests that a lot of information was lost when using only two dimensions. 
+
+To select the optimal number of dimensions, scree plot is generated. 
+
+```{r}
+employ.mds <- matrix(nrow=nrow(employ)-1,ncol=2)
+for (i in 1:(nrow(employ)-1)){
+  employ.mds[i,1] <- i
+  set.seed(1)
+  employ.mds[i,2] <- mds(employ.dist, ndim=i, type="interval")$stress
+}
+plot(employ.mds, type="b", main="scree plot", 
+     xlab="number of dimensions", ylab="stress")
+```
+
+Here is a difficult case where there is no clear cut-off point. Depending on the purpose of the study, 4-8 dimensions seem to be a reasonable range. 
+
+When implementing Sammon mapping, there are a few differences  which are explained below.
+
+```{r}
+#Sammon
+library(MASS)
+employ.sm <- sammon(employ.dist, k=2)
+plot(employ.sm$points, type="n", xlab="Axis 1", ylab="Axis 2",asp=1)
+text(employ.sm$points, labels=names(employ.dist))
+```
+
+As `sammon` is not from the `smacof` library, we cannot easily plot the Shepard diagram by setting `plot.type="Shepard"`. Instead, an additional command `Shepard` is needed to produce the Shepard diagram.
+
+```{r}
+employ.sh<-Shepard(employ.dist, employ.sm$points, p=2)
+plot(employ.sh, pch=".")
+lines(employ.sh$x, employ.sh$yf, type = "S")
+```
+
+(e) 
+
+There is no clear group structure when applying metric MDS or Sammon mapping on the dissimilarity matrix computed over countries. Turkey seems to locate slightly far away from the remaining countries.
+
+(f) You can perform the above analysis again, but using `employ.dist.var` as the input to MDS methods. 

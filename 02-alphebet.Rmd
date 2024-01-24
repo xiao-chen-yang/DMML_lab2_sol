@@ -1,0 +1,43 @@
+# Exercise 2: Identifying letters of alphabet
+
+Wolford and Hollingsworth (1974) were interested in the confusions made when a person attempts to identify letters of the alphabet viewed for some milliseconds only. A confusion matrix was constructed that shows the frequency with which each stimulus letter was mistakenly called something else. A section of this matrix is shown in the table below.
+
+```{r, warning=FALSE, echo=FALSE}
+library(knitr)
+library(kableExtra)
+df <- data.frame(Letter=c('B','C','D','F','G'),
+                 B=c('--','3','7','3','7'),
+                 C=c('','--','5','5','12'),
+                 D=c('','','--','7','2'),
+                 F=c('','','','--','2'),
+                 G=c('','','','','--'))
+kable(df, escape=F)
+```
+
+The dataset is available from 'Datasets for week 2', under the name 'letter.csv'. The task is to visualise the letters as points in one/two/three dimensions and discover if there is anything interesting. 
+
+**Task 2**
+
+(a) Is it appropriate to use principal component analysis to visualise the data? `r mcq(c("Yes", answer="No"))`
+
+(b) Is this dataset a dissimilarity matrix? `r mcq(c("Yes", answer="No"))`  
+
+(c) Apply an appropriate MDS method to this data. 
+
+(d) How many dimensions would you keep?
+
+(e) Comment on any pattern from the configuration plot. 
+
+`r hide("Hint")`
+If you would like to visualise the data in 3D, the following commands may be helpful. 
+```{r, eval=FALSE}
+library(rgl)
+plot3d(...)
+text3d(...)
+```
+`r unhide()`
+
+(f) Apart from the number of dimensions, have you introduced any other parameter(s) in your analysis? If so, study their influence by trying different values.
+
+(g) Finally, as mentioned in the lecture note, MDS are sensitive to initial configurations. Try multiple initial configurations and compare the results. 
+*You may need to look into the help page of `mds` to find out how to change the initial configuration.*

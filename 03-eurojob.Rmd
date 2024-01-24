@@ -1,0 +1,21 @@
+# Exercise 3: Employment in Europe
+
+We have looked at European employment dataset in Lab 1. Let's now analyse this dataset again using MDS. MDS allows us to visualise how similar two countries are as well as visualising the variables. You may load the data by using the following command:
+```{r}
+employ <- read.table("eurojob.txt", header=TRUE, row.names=1)
+```
+
+
+**Task 3**
+
+(a) For this dataset, is it more appropriate to use the original variables or the standardised variables when calculating the distance matrix? `r mcq(c("original variables", answer="standardised variables"))`
+
+(b) Compute a distance matrix for visualising the countries and another distance matrix for visualising the variables. 
+
+(c) Which MDS method is more appropriate? `r mcq(c(answer="metric MDS", "non-metric MDS"))`
+
+(d) Apply an appropriate MDS method to this data and decide the number of dimensions to keep. 
+
+(e) Do you see any clusters when visualising the countries, or any country distinct from others?
+
+(f) How would you interpret the plot on variables (i.e. variables as points)?  
