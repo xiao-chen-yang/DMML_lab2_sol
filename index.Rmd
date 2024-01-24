@@ -59,7 +59,7 @@ mds(delta, type=c("ratio","interval") #delta: disimilarity matrix
     #When using "ratio", the function f in metric MDS is chosen as f(x)=bx;
     #When using "interval", the function f is chosen as f(x)=a+bx.
     
-# metric MDS
+# nonmetric MDS
 mds(delta, type="ordinal") #delta: disimilarity matrix
     #'type="ordinal' means the function f in non-metric MDS is a monotonic step function. 
 
